@@ -2,8 +2,6 @@
 
 'use strict';
 
-const { resolve } = require('path');
-
 const parseArgs = require('minimist');
 const chalk = require('chalk');
 
@@ -29,25 +27,26 @@ const readTests = () => {
 const main = tests => {
 	for (const file of args._) {
 		if (tests.length === 0) {
-			// eslint-disable-next-line global-require
-			global.readline = require('./readline');
-			// eslint-disable-next-line global-require
-			require(resolve(file));
+			run(file);
 		} else {
 			let n = 0;
 			for (const { input, output: expected } of tests) {
 				n++;
-				const output = run(input.join('\n'), file).trim();
-				if (output !== expected.join('\n')) {
+				const [ output, error ] = run(file, input.join('\n'));
+				const troutput = output.trim();
+				if (troutput !== expected.join('\n')) {
 					console.error(
 						// eslint-disable-next-line indent
-`${chalk.red(`Test #${n} failed`)}
+`${chalk.red(`${file}: Test #${n} failed`)}
   Input:
     ${input.join('\n    ')}
   Expected output:
     ${expected.join('\n    ')}
   Actual output:
-    ${output.split('\n').join('\n    ')}`);
+    ${troutput.split('\n').join('\n    ') +
+		(error
+			? '\n  Error output:\n    ' + error.split('\n').join('\n    ')
+			: '')}`);
 				}
 			}
 		}
@@ -55,5 +54,3 @@ const main = tests => {
 };
 
 readTests().then(main);
-
-// require(resolve(process.argv[2]));
