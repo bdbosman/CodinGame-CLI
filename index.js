@@ -3,10 +3,10 @@
 'use strict';
 
 const parseArgs = require('minimist');
-const chalk = require('chalk');
 
 const read = require('./testreader');
 const run = require('./runner');
+const { fatal, failed } = require('./errors');
 
 const args = parseArgs(process.argv.slice(2), {
 	alias: { t: 'test' }
@@ -27,26 +27,22 @@ const readTests = () => {
 const main = tests => {
 	for (const file of args._) {
 		if (tests.length === 0) {
-			run(file);
+			const [ , stderr, code, error ] = run(file);
+			if (code > 0 || error) {
+				fatal(file, code, stderr, error);
+			}
 		} else {
 			let n = 0;
 			for (const { input, output: expected } of tests) {
 				n++;
-				const [ output, error ] = run(file, input.join('\n'));
+				const [ output, stderr, code, error ] =
+					run(file, input.join('\n'));
+				if (error) {
+					fatal(file, code, stderr, error);
+				}
 				const troutput = output.trim();
 				if (troutput !== expected.join('\n')) {
-					console.error(
-						// eslint-disable-next-line indent
-`${chalk.red(`${file}: Test #${n} failed`)}
-  Input:
-    ${input.join('\n    ')}
-  Expected output:
-    ${expected.join('\n    ')}
-  Actual output:
-    ${troutput.split('\n').join('\n    ') +
-		(error
-			? '\n  Error output:\n    ' + error.split('\n').join('\n    ')
-			: '')}`);
+					failed(n, file, input, expected, troutput, stderr);
 				}
 			}
 		}

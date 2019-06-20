@@ -1,38 +1,42 @@
 'use strict';
 
 const { platform } = require('os');
-const { join, extname } = require('path');
+const { join, extname, basename } = require('path');
 const { spawnSync } = require('child_process');
 
+const spawn = (command, args, input) => {
+	const { stdout, stderr, status, error } = spawnSync(
+		command,
+		args,
+		input ? { input } : { stdio: 'inherit' });
+	return [
+		stdout ? String(stdout) : stdout,
+		stderr ? String(stderr) : stderr,
+		status,
+		error
+	];
+};
+
 const runners = {
-	js: (path, input) => {
-		const { stdout, stderr } = spawnSync(
-			'node',
-			[
-				'-r', join(__dirname, 'setup.js'),
-				path
-			],
-			input
-				? { input }
-				: { stdio: 'inherit' });
-		return [ String(stdout), String(stderr) ];
-	},
-	ts: (path, input) => {
-		const { stdout, stderr } = spawnSync(
-			platform() === 'win32'
-				? 'cmd'
-				: 'ts-node',
-			[
-				...platform() === 'win32'
-					? [ '/c', 'ts-node' ]
-					: [],
-				'-r', join(__dirname, 'setup.js'),
-				path
-			],
-			input
-				? { input }
-				: { stdio: 'inherit' });
-		return [ String(stdout), String(stderr) ];
+	js: (path, input) =>
+		spawn('node', [
+			'-r', join(__dirname, 'setup.js'), path
+		], input),
+	ts: (path, input) =>
+		spawn(platform() === 'win32' ? 'cmd' : 'ts-node', [
+			...platform() === 'win32'
+				? [ '/c', 'ts-node' ]
+				: [],
+			'-r', join(__dirname, 'setup.js'), path
+		], input),
+	hs: (path, input) => {
+		const [ cout, cerr, code ] = spawn(
+			'ghc',
+			[ path ]);
+		if (code > 0) {
+			return [ cout, cerr ];
+		}
+		return spawn(basename(path, '.hs'), [], input);
 	}
 };
 
@@ -41,7 +45,7 @@ const run = (path, input = null) => {
 	if (type in runners) {
 		return runners[type](path, input);
 	}
-	throw new TypeError('Unknown file type: ' + type);
+	throw new TypeError('Unknown file type:', type);
 };
 
 module.exports = run;
