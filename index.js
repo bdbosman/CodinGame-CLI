@@ -2,6 +2,8 @@
 
 'use strict';
 
+const { existsSync, readFileSync, writeFileSync } = require('fs');
+
 const parseArgs = require('minimist');
 
 const read = require('./testreader');
@@ -14,6 +16,15 @@ const args = parseArgs(process.argv.slice(2), {
 		s: 'size'
 	}
 });
+
+if (existsSync('codin.config.json')) {
+	const config = JSON.parse(readFileSync('codin.config.json'));
+	for (const [ key, value ] of Object.entries(config)) {
+		if (!args[key] || Array.isArray(args[key]) && args[key].length === 0) {
+			args[key] = value;
+		}
+	}
+}
 
 const readTests = () => {
 	if (args.test) {
@@ -51,6 +62,10 @@ const main = tests => {
 		}
 	}
 };
+
+if (args.save) {
+	writeFileSync('codin.config.json', JSON.stringify(args, null, '\t'));
+}
 
 if (args.size) {
 	const files = Array.isArray(args.size)
