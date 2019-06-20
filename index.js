@@ -9,7 +9,10 @@ const run = require('./runner');
 const { fatal, failed } = require('./errors');
 
 const args = parseArgs(process.argv.slice(2), {
-	alias: { t: 'test' }
+	alias: {
+		t: 'test',
+		s: 'size'
+	}
 });
 
 const readTests = () => {
@@ -48,5 +51,17 @@ const main = tests => {
 		}
 	}
 };
+
+if (args.size) {
+	const files = Array.isArray(args.size)
+		? args.size
+		: [ args.size ];
+	// eslint-disable-next-line global-require
+	const { statSync } = require('fs');
+	files.forEach(file =>
+		console.log(
+			file + ': ' +
+			statSync(file).size + ' bytes'));
+}
 
 readTests().then(main);

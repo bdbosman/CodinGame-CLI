@@ -29,15 +29,8 @@ const runners = {
 				: [],
 			'-r', join(__dirname, 'setup.js'), path
 		], input),
-	hs: (path, input) => {
-		const [ cout, cerr, code ] = spawn(
-			'ghc',
-			[ path ]);
-		if (code > 0) {
-			return [ cout, cerr ];
-		}
-		return spawn(basename(path, '.hs'), [], input);
-	}
+	hs: (path, input) =>
+		spawn('runhaskell', [ path ], input)
 };
 
 const run = (path, input = null) => {
