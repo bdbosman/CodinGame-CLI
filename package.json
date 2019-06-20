@@ -1,0 +1,28 @@
+{
+  "name": "codin",
+  "version": "0.0.1",
+  "description": "CodinGame CLI wrapper for Node.js (probably more languages later)",
+  "main": "index.js",
+  "bin": {
+    "codin": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trgwii/CodinGame-CLI.git"
+  },
+  "keywords": [
+    "codingame",
+    "cli",
+    "node",
+    "js"
+  ],
+  "author": "Thomas Rory Gummerson <thomas@gummerson.no> (https://trgwii.no/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/trgwii/CodinGame-CLI/issues"
+  },
+  "homepage": "https://github.com/trgwii/CodinGame-CLI#readme"
+}
