@@ -1,6 +1,6 @@
 {
   "name": "codin",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "CodinGame CLI wrapper for Node.js (probably more languages later)",
   "main": "index.js",
   "bin": {
