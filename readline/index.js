@@ -9,9 +9,15 @@ const readline = () => {
 	while (char !== '\r' && char !== '\n') {
 		line += char;
 		try {
-			readSync(process.stdin.fd, buf, 0, 1);
+			const bytesRead = readSync(process.stdin.fd, buf, 0, 1);
+			if (bytesRead === 0) {
+				return line;
+			}
 		} catch (err) {
-			return line;
+			if (err.code === 'EOF') {
+				return line;
+			}
+			continue;
 		}
 		char = String(buf);
 	}
